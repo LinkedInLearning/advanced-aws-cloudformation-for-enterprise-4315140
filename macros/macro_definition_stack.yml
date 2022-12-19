@@ -1,0 +1,13 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Parameters:
+  FunctionARN:
+    Description: ARN of the macro lambda function
+    Type: String
+Resources:
+  Macro:
+    Type: AWS::CloudFormation::Macro
+    Properties:
+      Name: MyNoChangeMacro
+      Description: Definition for the macro
+      FunctionName: !Ref FunctionARN

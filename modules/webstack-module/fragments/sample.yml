@@ -1,0 +1,57 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: A test stack for demonstrating Cloudformation
+Parameters:
+  Subnet:
+    Description: Subnet in which to place the resources
+    Type: AWS::EC2::Subnet::Id
+    # this type is not that helpful, since it just shows IDs
+  InstanceType:
+    Description: The instance type for the Launch Config
+    Type: String
+    Default: t2.micro
+    AllowedValues:
+    - t2.nano
+    - t2.micro
+    - t2.small
+    - t2.medium
+    - t2.large
+Resources:
+  SecurityGroupHTTPFromWorld:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allows port 80 from the world
+      GroupName: !Sub 'HTTPFromWorld-${AWS::StackName}'
+      # If we do not specify egress, the default 
+      # "all traffic" egress rule will be created.
+      SecurityGroupIngress: 
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+      # Do I need VPC ID?
+      Tags:
+        - Key: Name
+          Value: HTTPFromWorld
+  MyInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      UserData:
+        Fn::Base64: |
+          #!/bin/bash -xe
+          sudo amazon-linux-extras install -y nginx1
+          sudo service nginx start
+      ImageId: ami-0b0dcb5067f052a63
+      InstanceType:
+        Ref: InstanceType
+      SecurityGroupIds:
+        - !GetAtt SecurityGroupHTTPFromWorld.GroupId
+      SubnetId:
+        Ref: Subnet
+      Tags:
+        - Key: Name
+          Value: MyNginxInstance
+Outputs:
+  InstanceIP:
+    Description: The public IP of the instance
+    Value: !GetAtt MyInstance.PublicIp

@@ -1,0 +1,12 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Create a subnet that depends on a vpc in another stack.
+Resources:
+  MySubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: us-east-1b
+      CidrBlock: 10.0.0.0/24
+      VpcId: !ImportValue ExportedVPCID
+      Tags:
+        - Key: Name
+          Value: DeleteThisSubnet

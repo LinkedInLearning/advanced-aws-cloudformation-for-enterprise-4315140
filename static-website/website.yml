@@ -1,0 +1,14 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: A simple CloudFormation template
+Resources:
+    Bucket:
+        Type: AWS::S3::Bucket
+        Properties:
+            BucketName: my-cloudformation-demo
+            AccessControl: PublicRead
+            WebsiteConfiguration:
+                IndexDocument: index.html
+Outputs:
+    WebsiteURL:
+        Value: !GetAtt [Bucket, WebsiteURL]
+        Description: URL for website hosted on S3            

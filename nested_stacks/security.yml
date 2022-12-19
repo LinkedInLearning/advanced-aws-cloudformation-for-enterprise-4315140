@@ -1,0 +1,27 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: |
+  Standalone security group
+
+Parameters:
+  OpenPort:
+    Description: HTTP Port to open 
+    Type: String
+  
+Resources:
+  SecurityGroupHTTPFromWorld:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allows port 80 from the world
+      GroupName: !Sub 'HTTPFromAnywhere-${AWS::StackId}'
+
+      # If we do not specify egress, the default 
+      # "all traffic" egress rule will be created.
+      SecurityGroupIngress: 
+        - IpProtocol: tcp
+          FromPort: !Ref OpenPort
+          ToPort: !Ref OpenPort
+          CidrIp: 0.0.0.0/0
+
+Outputs:
+  SecurityGroupId:
+    Value: !GetAtt SecurityGroupHTTPFromWorld.GroupId

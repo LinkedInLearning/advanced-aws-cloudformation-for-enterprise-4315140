@@ -1,0 +1,24 @@
+Description: >
+    Using a custom resource by referring to an exported Arn.  
+    Custom resource is created in custom-resource-standalone.yml
+Parameters:
+
+    BucketName:
+      Type: String
+      Description: The name of the s3 bucket you want to create    
+
+Resources:
+  MyCustomResourceCallout:
+    Type: Custom::LambdaCallout
+    Properties:
+      ServiceToken: !ImportValue MyCustomResourceArn
+      BucketName: !Ref BucketName
+
+Outputs:
+  OutputFromFunction:
+    Description: Output from the custom function
+    Value: !GetAtt MyCustomResourceCallout.msg
+
+  ResponseText:
+    Description: Output from the custom function
+    Value: !GetAtt MyCustomResourceCallout.responseText

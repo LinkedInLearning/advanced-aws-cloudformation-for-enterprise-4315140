@@ -1,0 +1,39 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: A test stack for demonstrating Cloudformation
+Resources:
+  SecurityGroupHTTPFromWorld:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allows port 80 from the world
+      GroupName: HTTPFromWorld
+      # If we do not specify egress, the default 
+      # "all traffic" egress rule will be created.
+      SecurityGroupIngress: 
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+      # Do I need VPC ID?
+      Tags:
+        - Key: Name
+          Value: HTTPFromWorld
+  MyInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      UserData:
+        Fn::Base64: |
+          #!/bin/bash -xe
+          sudo amazon-linux-extras install -y nginx1
+          sudo service nginx start
+      ImageId: ami-087c17d1fe0178315
+      InstanceType: t3.small
+      SecurityGroupIds:
+        - !GetAtt SecurityGroupHTTPFromWorld.GroupId
+      Tags:
+        - Key: Name
+          Value: MyNginxInstance
+Outputs:
+  InstanceIP:
+    Description: The public IP of the instance
+    Value: !GetAtt MyInstance.PublicIp

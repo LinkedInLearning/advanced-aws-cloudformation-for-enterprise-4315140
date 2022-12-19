@@ -1,0 +1,28 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: |
+  Creates an EC2 instance
+
+Parameters:
+  SecurityGroupId:
+    Description: A security group to apply to the instance
+    Type: String
+
+Resources:
+  MyInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      UserData:
+        Fn::Base64: |
+          #!/bin/bash -xe
+          sudo amazon-linux-extras install -y nginx1
+          sudo service nginx start
+      ImageId: ami-0b0dcb5067f052a63
+      InstanceType: t3.micro
+      SecurityGroupIds:
+        - !Ref SecurityGroupId
+      Tags: 
+        - Key: Name
+          Value: MyNestedNginxInstance        
+Outputs:
+  InstanceIp:
+    Value: !GetAtt MyInstance.PublicIp

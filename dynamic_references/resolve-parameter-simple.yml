@@ -1,0 +1,11 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: A simple CloudFormation template
+Resources:
+    MyBucket:
+        Type: AWS::S3::Bucket
+        Properties:
+            BucketName: '{{resolve:ssm:MyBucketNameParameter}}'
+    MyBucket2:
+        Type: AWS::S3::Bucket
+        Properties:
+            BucketName: '{{resolve:secretsmanager:MyBucketSecret:SecretString:bucketname}}'

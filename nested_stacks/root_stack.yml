@@ -1,0 +1,32 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: |
+  Demonstration of nested stacks
+
+Parameters:
+  OpenPort:
+    Description: Open HTTP on this port 
+    Type: String
+  
+Resources:
+  SecurityStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        OpenPort: !Ref OpenPort 
+      TemplateURL: ./security.yml
+
+  ComputeStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        # using different variables names to show they don't need to match
+        # This usage does NOT rely on export/ImportValue
+        # This parameter must be defined in the compute template, just as if
+        # it were intended to be user-defined.
+        SecurityGroupId: !GetAtt SecurityStack.Outputs.SecurityGroupId 
+      TemplateURL: ./compute.yml
+
+Outputs:
+  InstanceIP:
+    Description: Get to nginx here!
+    Value: !GetAtt ComputeStack.Outputs.InstanceIp

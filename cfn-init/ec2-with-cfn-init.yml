@@ -1,0 +1,91 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: A test stack for demonstrating Cloudformation
+Parameters:
+  KeyPair:
+    Description: The key you'll use to log in to this instance
+    Type: AWS::EC2::KeyPair::KeyName
+  Subnet:
+    Description: Subnet in which to place the resources
+    Type: AWS::EC2::Subnet::Id
+    # this type is not that helpful, since it just shows IDs
+  InstanceType:
+    Description: The instance type for the Launch Config
+    Type: String
+    Default: t2.micro
+    AllowedValues:
+    - t2.nano
+    - t2.micro
+    - t2.small
+    - t2.medium
+    - t2.large
+Resources:
+  SecurityGroupHTTPFromWorld:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allows port 80 from the world
+      GroupName: !Sub HTTPFromWorld-${AWS::StackName}
+      # If we do not specify egress, the default 
+      # "all traffic" egress rule will be created.
+      SecurityGroupIngress: 
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+      # Do I need VPC ID?
+  MyInstance:
+    Type: AWS::EC2::Instance
+    CreationPolicy:
+      ResourceSignal:
+        Timeout: PT10M      
+    Metadata:
+      AWS::Cloudformation::Init:
+        config:
+          packages:
+          groups:
+          users:
+          sources:
+          files:
+          commands:
+            - sudo amazon-linux-extras install -y nginx1
+          services:
+            systemd:
+              nginx:
+                enabled: true
+                ensureRunning: true
+    Properties:
+      KeyName: !Ref KeyPair    
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash -xe
+          yum install -y aws-cfn-bootstrap
+          /opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource MyInstance --region ${AWS::Region}
+          /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource MyInstance --region ${AWS::Region}
+      ImageId: ami-0b0dcb5067f052a63
+      InstanceType:
+        Ref: InstanceType
+      SecurityGroupIds:
+        - !GetAtt SecurityGroupHTTPFromWorld.GroupId
+        - !GetAtt SecurityGroupSSHFromWorld.GroupId
+      SubnetId:
+        Ref: Subnet
+  SecurityGroupSSHFromWorld:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allows port 22 from the world
+      GroupName: !Sub SSHFromWorld-${AWS::StackName}
+      # If we do not specify egress, the default 
+      # "all traffic" egress rule will be created.
+      SecurityGroupIngress: 
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+      # Do I need VPC ID?
+      Tags:
+        - Key: Name
+          Value: SSHFromWorld           
+Outputs:
+  InstanceIP:
+    Description: The public IP of the instance
+    Value: !GetAtt MyInstance.PublicIp        

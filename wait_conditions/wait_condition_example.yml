@@ -1,0 +1,21 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: |
+  Shows a wait condition
+Resources:
+    MyBucket:
+        Type: AWS::S3::Bucket
+        Properties:
+            BucketName: bmr-some-bucket
+    MyWaitCondition:
+      Type: AWS::CloudFormation::WaitCondition
+      Properties:
+        Count: 1
+        Handle: !Ref MyWaitHandle
+        Timeout: 300      # 5 minutes
+      DependsOn: MyBucket
+    MyWaitHandle:
+      Type: AWS::CloudFormation::WaitConditionHandle # we should see the URL in this event output.
+Outputs:
+  MySignalData:
+    Description: Data returned from whatever signaled the handler.
+    Value: !GetAtt MyWaitCondition.Data

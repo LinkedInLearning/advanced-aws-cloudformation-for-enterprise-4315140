@@ -1,0 +1,115 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: |
+  This template demos all the built-in AWS Cloudformation parameter types.  They will appear in alpha order.
+  It is possible to influence the appearance order by using AWS::CloudFormation::Interface, but it is fairly
+  involved.  It's best to limit your input parameters, lest different stacks made from the same template
+  diverge too much from each other.
+Parameters:
+  BucketName:
+    Type: String
+    Description: The name of a bucket.  This appears near the user prompt.
+    Default: MyDefaultBucketName
+
+  AllowedValuesString:
+    Type: String
+    Description: This param uses AllowedValues
+    AllowedValues:
+      - red
+      - blue
+      - green
+
+  SomeNumber:
+    Type: Number
+    Description: This is a Number type
+
+  ListParam:
+    Type: List<Number>
+    Description: This uses type List<Number> expects a comma-separated list of integers
+
+  CommaDelimitedListParam:
+    Type: CommaDelimitedList
+    Description: This is a type CommaDelimitedList and expects strings separated by commas.
+
+  AvailabilityZoneName:
+    Description: AWS::EC2::AvailabilityZone::Name
+    Type: AWS::EC2::AvailabilityZone::Name
+
+  # "Note that the AWS CloudFormation console doesn't show a drop-down 
+  # list of values for this parameter type." . So what good is it? 
+  EC2ImageId:
+    Description: AWS::EC2::Image::Id
+    Type: AWS::EC2::Image::Id
+
+  EC2InstanceId:
+    Description: AWS::EC2::Instance::Id
+    Type: AWS::EC2::Instance::Id
+
+  KeyPairName:
+    Description: AWS::EC2::KeyPair::KeyName
+    Type: AWS::EC2::KeyPair::KeyName
+
+  SecurityGroupName:
+    Description: AWS::EC2::SecurityGroup::GroupName
+    Type: AWS::EC2::SecurityGroup::GroupName
+
+  SecurityGroupId:
+    Description: AWS::EC2::SecurityGroup::Id
+    Type: AWS::EC2::SecurityGroup::Id
+
+  SubnetID:
+    Description: AWS::EC2::Subnet::Id
+    Type: AWS::EC2::Subnet::Id
+
+  VolumeID:
+    Description: AWS::EC2::Volume::Id
+    Type: AWS::EC2::Volume::Id
+
+  VPCId:
+    Description: AWS::EC2::VPC::Id
+    Type: AWS::EC2::VPC::Id
+
+  Route53HostedZoneId:
+    Description: AWS::Route53::HostedZone::Id
+    Type: AWS::Route53::HostedZone::Id
+
+  AZNameList:
+    Description: List<AWS::EC2::AvailabilityZone::Name>
+    Type: List<AWS::EC2::AvailabilityZone::Name>
+
+  EC2ImageIdList:
+    Description: List<AWS::EC2::Image::Id>
+    Type: List<AWS::EC2::Image::Id>
+
+  EC2InstanceIdList:
+    Description: List<AWS::EC2::Instance::Id>
+    Type: List<AWS::EC2::Instance::Id>
+
+  SecurityGroupNameList:
+    Description: List<AWS::EC2::SecurityGroup::GroupName>
+    Type: List<AWS::EC2::SecurityGroup::GroupName>
+
+  SecurityGroupIdList:
+    Description: List<AWS::EC2::SecurityGroup::Id>
+    Type: List<AWS::EC2::SecurityGroup::Id>
+
+  SubnetIdList:
+    Description: List<AWS::EC2::Subnet::Id>
+    Type: List<AWS::EC2::Subnet::Id>
+
+  VolumeIdList:
+    Description: List<AWS::EC2::Volume::Id>
+    Type: List<AWS::EC2::Volume::Id>
+
+  VPCIdList:
+    Description: List<AWS::EC2::VPC::Id>
+    Type: List<AWS::EC2::VPC::Id>
+
+  Route53HostedZoneIdList:
+    Description: List<AWS::Route53::HostedZone::Id>
+    Type: List<AWS::Route53::HostedZone::Id>
+
+Resources:
+    MyBucket:
+        Type: AWS::S3::Bucket
+        Properties:
+            BucketName: !Ref BucketName

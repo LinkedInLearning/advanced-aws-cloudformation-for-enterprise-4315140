@@ -1,0 +1,18 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: |
+  
+Parameters:
+  Subnet:
+    Description: Subnet in which to place the resources
+    Type: AWS::EC2::Subnet::Id
+    # this type is not that helpful, since it just shows IDs
+Resources:
+  WebStackResource:
+    Type: LinkedIn::Learning::WebStack::MODULE
+    Properties:
+      Subnet: !Ref Subnet
+      InstanceType: t3.micro
+Outputs:
+  IPAddress:
+    Description: Fetched from module outputs
+    Value: WebStackResource.Outputs.InstanceIP

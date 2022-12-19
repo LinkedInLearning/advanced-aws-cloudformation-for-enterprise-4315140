@@ -1,0 +1,13 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+Description: |
+  A template that demonstrates how to use a macro
+Parameters:
+  BucketName:
+    Type: String
+Transform: [MyNoChangeMacro]
+Resources:
+  Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref BucketName

@@ -1,0 +1,130 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: |
+  
+Parameters:
+
+  RepoID:
+    Description: The GitHub repo ID in the form username/repo_name
+    Default: brandonrich/linkedin_learning_cloudformation
+    Type: String
+
+  TemplatePath:
+    Description: The name of the GitHub repo
+    Default: automation/template.yml
+    Type: String    
+
+  BucketName:
+    Description: | 
+      Provide the name of a bucket to be used by CodePipeline |
+      when it fetches code from GitHub.  Remember that bucket names must be globally unique.
+    Type: String    
+
+  ConnectionARN:
+    Description: The ARN of the CodeStar connection to GitHub
+    Type: String
+  
+Resources:
+  MyBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+          BucketName: !Ref BucketName
+
+  MyPipeline:
+    Type: AWS::CodePipeline::Pipeline
+    Properties:
+      ArtifactStore:
+        Type: S3
+        Location: !Ref MyBucket
+      Name: MyInfrastructureAsCodePipeline
+      RestartExecutionOnUpdate: true
+      RoleArn: !GetAtt CodePipelineServiceRole.Arn
+      Stages:
+        # each of these is called a StageDeclaration
+        # See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-codepipeline-pipeline-stages.html
+        - Name: Source
+          Actions:
+          # each of these is called an ActionDeclaration.
+          # see https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-codepipeline-pipeline-stages-actions.html
+          - Name: Source
+            InputArtifacts: []
+            ActionTypeId:
+              # For all available action types and their values, see
+              # https://docs.aws.amazon.com/codepipeline/latest/userguide/reference-pipeline-structure.html#actions-valid-providers
+              Category: Source
+              Owner: AWS
+              Version: 1          # This is actually GitHub v2, but since it's through CodeStar, it's v1.
+              Provider: CodeStarSourceConnection
+            OutputArtifacts:
+            - Name: SourceCode
+            Configuration:
+              # These params are described here:
+              # https://docs.aws.amazon.com/codepipeline/latest/userguide/action-reference-CodestarConnectionSource.html
+              ConnectionArn: !Ref ConnectionARN
+              FullRepositoryId: !Ref RepoID
+              BranchName: main
+            RunOrder: 1
+        # Build and Deploy, etc., stages would follow. Here is an example
+        - Name: Deploy
+          Actions:
+          - Name: CloudFormationDeploy
+            ActionTypeId:
+              Category: Deploy
+              Owner: AWS
+              Provider: CloudFormation
+              Version: '1'
+            InputArtifacts:
+              - Name: SourceCode
+            Configuration:
+              ActionMode: CREATE_UPDATE
+              Capabilities: CAPABILITY_IAM # this declares that the template being built will contain IAM changes.  I think this triggers that assertion checkbox for th euser.
+              # since we will not be running this manually, we need to provide 
+              # a role to permit the automated Cloudformation to do things
+              RoleArn: !GetAtt CloudformationServiceRole.Arn 
+              StackName: MyGitHubAutomatedTemplate
+              # this refers to the input artifact by name.  Too bad we can't declare a 
+              # constant in the app, so we would not be repeating it in a hard-coded fashion.
+              TemplatePath: !Sub
+                - 'SourceCode::${template_path}'
+                - template_path: !Ref TemplatePath
+            RunOrder: 1
+  
+  CodePipelineServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - codepipeline.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Description: Allows CodePipeline to call services on your behalf.
+      Policies:
+        - PolicyName: SuperAdminEverything
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: '*'
+                Resource: '*'
+      RoleName: CodePipelineServiceRole
+
+  CloudformationServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - cloudformation.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Description: Allows Cloudformation to call services on your behalf.  Slight change.
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonS3FullAccess
+        - arn:aws:iam::aws:policy/AmazonEC2FullAccess # this should allow not only creating instances, but security groups as well
+      RoleName: CloudformationServiceRole

@@ -1,0 +1,74 @@
+{
+    "typeName": "LinkedIn::Learning::WebStack::MODULE",
+    "description": "Schema for Module Fragment of type LinkedIn::Learning::WebStack::MODULE",
+    "properties": {
+        "Parameters": {
+            "type": "object",
+            "properties": {
+                "Subnet": {
+                    "type": "object",
+                    "properties": {
+                        "Type": {
+                            "type": "string"
+                        },
+                        "Description": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "Type",
+                        "Description"
+                    ],
+                    "description": "Subnet in which to place the resources"
+                },
+                "InstanceType": {
+                    "type": "object",
+                    "properties": {
+                        "Type": {
+                            "type": "string"
+                        },
+                        "Description": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "Type",
+                        "Description"
+                    ],
+                    "description": "The instance type for the Launch Config"
+                }
+            }
+        },
+        "Resources": {
+            "properties": {
+                "SecurityGroupHTTPFromWorld": {
+                    "type": "object",
+                    "properties": {
+                        "Type": {
+                            "type": "string",
+                            "const": "AWS::EC2::SecurityGroup"
+                        },
+                        "Properties": {
+                            "type": "object"
+                        }
+                    }
+                },
+                "MyInstance": {
+                    "type": "object",
+                    "properties": {
+                        "Type": {
+                            "type": "string",
+                            "const": "AWS::EC2::Instance"
+                        },
+                        "Properties": {
+                            "type": "object"
+                        }
+                    }
+                }
+            },
+            "type": "object",
+            "additionalProperties": false
+        }
+    },
+    "additionalProperties": true
+}

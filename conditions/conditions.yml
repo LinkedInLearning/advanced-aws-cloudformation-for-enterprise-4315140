@@ -1,0 +1,95 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: A test stack for demonstrating Cloudformation
+Parameters:
+  Subnet:
+    Description: Subnet in which to place the resources
+    Type: AWS::EC2::Subnet::Id
+    # this type is not that helpful, since it just shows IDs
+  KeyPair:
+    Description: The key you'll use to log in to this instance
+    Type: AWS::EC2::KeyPair::KeyName
+  AllowSSH: # note, another approach would be to make the condition evaluate whether the user enters a keypair or not, but this is more explicit.
+    Description: |
+      Used to determine if we create and attach a security group for 
+      SSH and whether we attach a keypair to this instance
+    Type: String
+    AllowedValues:
+      - true
+      - false
+  Environment:
+    Description: |
+      Specifies the environment for which you're deploying.  Will 
+      be used to drive conditionals governing what resources to create
+    Type: String
+    AllowedValues:
+      - production
+      - development
+Conditions:
+  IsProduction: !Equals [ !Ref Environment, 'production' ]
+  AllowSSHCondition: !Equals [ !Ref AllowSSH, 'true' ]  # condition should not have the exact same name as the input param
+Resources:
+  SecurityGroupHTTPFromWorld:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allows port 80 from the world
+      GroupName: !Sub 'HTTPFromWorld-${AWS::StackName}'
+      # If we do not specify egress, the default 
+      # "all traffic" egress rule will be created.
+      SecurityGroupIngress: 
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+      # Do I need VPC ID?
+      Tags:
+        - Key: Name
+          Value: HTTPFromWorld
+  SecurityGroupSSHFromWorld:
+    Type: AWS::EC2::SecurityGroup
+    Condition: AllowSSHCondition
+    Properties:
+      GroupDescription: Allows port 22 from the world
+      GroupName: !Sub 'SSHFromWorld-${AWS::StackName}'
+      # If we do not specify egress, the default 
+      # "all traffic" egress rule will be created.
+      SecurityGroupIngress: 
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+      # Do I need VPC ID?
+      Tags:
+        - Key: Name
+          Value: SSHFromWorld          
+  MyInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      UserData:
+        Fn::Base64: |
+          #!/bin/bash -xe
+          sudo amazon-linux-extras install -y nginx1
+          sudo service nginx start
+      ImageId: ami-0b0dcb5067f052a63
+      KeyName: !Ref KeyPair
+      InstanceType: !If [ IsProduction, "t3.large", "t3.nano" ]  # two different synxtax styles shown for !If
+      SecurityGroupIds:
+        - !GetAtt SecurityGroupHTTPFromWorld.GroupId
+        - !If 
+          - AllowSSHCondition
+          - !GetAtt SecurityGroupSSHFromWorld.GroupId
+          - !Ref AWS::NoValue # when this is evaluated, it essentially erases this line, so we don't attempt to attach a non-existent security group
+                              # note that it has to be referenced like a parameter.
+      SubnetId:
+        Ref: Subnet
+      Tags:
+        - Key: Name
+          Value: !Join 
+            - '-'
+            - - 'MyNginxInstance'
+              - !Ref Environment 
+              - !If [ AllowSSHCondition, 'withSSH', 'noSSH' ]
+Outputs:
+  InstanceIP:
+    Description: The public IP of the instance
+    Value: !GetAtt MyInstance.PublicIp
