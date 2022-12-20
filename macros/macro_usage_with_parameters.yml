@@ -1,7 +1,8 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
 Description: |
-  A template that demonstrates how to use a macro
+  A template that demonstrates how to use a macro at both 
+  template and snippet levels with parameters.
 Parameters:
   BucketName:
     Type: String

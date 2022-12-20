@@ -1,5 +1,0 @@
-[2022-12-08T03:45:59Z] DEBUG    - Logging set up successfully
-[2022-12-08T03:45:59Z] DEBUG    - Running None: Namespace(artifact_type=None, command=<function init at 0x11688d400>, endpoint_url=None, force=False, region=None, subparser_name=None, target_schemas=[], type_name=None, verbose=0, version=False)
-[2022-12-08T03:45:59Z] DEBUG    - Root directory: /Users/brandon/apps/linkedin/advanced-cloudformation/playground/modules
-[2022-12-08T03:45:59Z] WARNING  - Initializing new project
-[2022-12-08T03:45:59Z] DEBUG    - Loading project file '/Users/brandon/apps/linkedin/advanced-cloudformation/playground/modules/.rpdk-config'

@@ -8,7 +8,7 @@ Parameters:
     # this type is not that helpful, since it just shows IDs
 Resources:
   WebStackResource:
-    Type: LinkedIn::Learning::WebStack::MODULE
+    Type: Brandon::Demo::WebStack::MODULE
     Properties:
       Subnet: !Ref Subnet
       InstanceType: t3.micro

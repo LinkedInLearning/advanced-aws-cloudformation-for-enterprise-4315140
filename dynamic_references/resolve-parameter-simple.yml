@@ -8,4 +8,4 @@ Resources:
     MyBucket2:
         Type: AWS::S3::Bucket
         Properties:
-            BucketName: '{{resolve:secretsmanager:MyBucketSecret:SecretString:bucketname}}'
+            BucketName: '{{resolve:secretsmanager:MyBucketSecret2:SecretString:bucketname}}'

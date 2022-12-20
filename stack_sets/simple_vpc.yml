@@ -1,0 +1,19 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Simple VPC creation
+Resources:
+  MyVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      InstanceTenancy: default
+      Tags:
+        - Key: Name
+          Value: DeleteThisVPC
+Outputs:
+  VPCID:
+    Description: the ID of this VPC
+    Value: !Ref MyVPC
+    Export: 
+      Name: ExportedVPCID
