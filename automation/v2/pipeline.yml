@@ -5,7 +5,7 @@ Parameters:
 
   RepoID:
     Description: The GitHub repo ID in the form username/repo_name
-    Default: brandonrich/linkedin_learning_cloudformation
+    Default: yveszakra/linkedin_learning_cloudformation
     Type: String
 
   TemplatePath:
